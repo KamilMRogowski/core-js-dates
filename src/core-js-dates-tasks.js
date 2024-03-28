@@ -198,9 +198,11 @@ function getCountWeekendsInMonth(month, year) {
 function getWeekNumberByDate(date) {
   const dateObject = new Date(date);
   const startOfTheYear = new Date(dateObject.getFullYear(), 0);
-  const firstDayofYear = startOfTheYear.getDay();
+  let dayOfWeek = startOfTheYear.getDay();
+  dayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  startOfTheYear.setDate(startOfTheYear.getDate() - dayOfWeek);
   let dateDiffernce = dateObject.getTime() - startOfTheYear.getTime();
-  dateDiffernce = dateDiffernce / 1000 / 60 / 60 / 24 - firstDayofYear;
+  dateDiffernce = dateDiffernce / 1000 / 60 / 60 / 24;
   const weeks = Math.ceil(dateDiffernce / 7);
   return weeks;
 }
@@ -296,8 +298,37 @@ function getQuarter(date) {
  * { start: '01-01-2024', end: '15-01-2024' }, 1, 3 => ['01-01-2024', '05-01-2024', '09-01-2024', '13-01-2024']
  * { start: '01-01-2024', end: '10-01-2024' }, 1, 1 => ['01-01-2024', '03-01-2024', '05-01-2024', '07-01-2024', '09-01-2024']
  */
-function getWorkSchedule(/* period, countWorkDays, countOffDays */) {
-  throw new Error('Not implemented');
+function dateToString(date) {
+  let day = date.getDate();
+  let month = date.getMonth() + 1;
+  const year = date.getFullYear();
+
+  day = (day < 10 ? '0' : '') + day;
+  month = (month < 10 ? '0' : '') + month;
+
+  return `${day}-${month}-${year}`;
+}
+function periodToDate(date) {
+  const elements = date.split('-');
+  const day = Number(elements[0]);
+  const month = Number(elements[1]) - 1;
+  const year = Number(elements[2]);
+  return new Date(year, month, day);
+}
+function getWorkSchedule(period, countWorkDays, countOffDays) {
+  const startDate = periodToDate(period.start);
+  const endDate = periodToDate(period.end);
+  const workSchedule = [];
+  while (startDate <= endDate) {
+    for (let i = 0; i < countWorkDays; i += 1) {
+      if (startDate <= endDate) {
+        workSchedule.push(dateToString(startDate));
+        startDate.setDate(startDate.getDate() + 1);
+      }
+    }
+    startDate.setDate(startDate.getDate() + countOffDays);
+  }
+  return workSchedule;
 }
 
 /**
