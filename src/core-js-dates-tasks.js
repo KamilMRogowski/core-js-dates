@@ -196,16 +196,21 @@ function getCountWeekendsInMonth(month, year) {
  * Date(2024, 1, 23) => 8
  */
 function getWeekNumberByDate(date) {
-  const dateObject = new Date(date);
-  const startOfTheYear = new Date(dateObject.getFullYear(), 0);
-  let dayOfWeek = startOfTheYear.getDay();
-  dayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  startOfTheYear.setDate(startOfTheYear.getDate() - dayOfWeek);
-  let dateDiffernce = dateObject.getTime() - startOfTheYear.getTime();
-  dateDiffernce = dateDiffernce / 1000 / 60 / 60 / 24;
-  const weeks = Math.ceil(dateDiffernce / 7);
-  return weeks;
+  const currentDate = new Date(date);
+  currentDate.setMonth(0, 1);
+  const dayOfWeek = currentDate.getDay();
+  let firstThursdayOffset = (4 - dayOfWeek + 7) % 7;
+  if (firstThursdayOffset > 3) {
+    firstThursdayOffset -= 7;
+  }
+  currentDate.setDate(currentDate.getDate() + firstThursdayOffset);
+  const oneDay = 24 * 60 * 60 * 1000;
+  const daysPassed = Math.round((date - currentDate) / oneDay);
+  const weekNumber = Math.floor((daysPassed + 3) / 7) + 1;
+
+  return weekNumber;
 }
+// jeśli ostatni tydzień posiada 01.01 to nie dodawaj
 
 /**
  * Returns the date of the next Friday the 13th from a given date.
